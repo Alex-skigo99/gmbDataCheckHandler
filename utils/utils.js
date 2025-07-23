@@ -69,7 +69,7 @@ export function checkMoreThan5ServiceAreas(serviceAreas) {
     }
 }
 
-export function checkMissingHoursWebDescription(regularHours, websiteUri, description = '') {
+export function checkMissingHoursWebDescription(regularHours, websiteUri, description) {
     try {
         const hoursData = typeof regularHours === 'string' 
             ? JSON.parse(regularHours || '{}') 

@@ -88,7 +88,7 @@ async function processGmbData(data) {
       checkMoreThan3Categories(additional_categories),
       checkNotRelevantCategories(primary_category, additional_categories),
       checkMoreThan5ServiceAreas(service_areas),
-      checkMissingHoursWebDescription(regular_hours, website_uri),
+      checkMissingHoursWebDescription(regular_hours, website_uri, description),
       checkSuspiciousReviews(reviews_dates),
       checkPolicyViolations(description),
       checkFakeAddress(address_lines, locality, administrative_area, postal_code, region_code)
