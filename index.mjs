@@ -16,7 +16,6 @@ export const handler = async (event) => {
     
     const results = [];
     
-    // Process each SQS record
     for (const record of event.Records) {
       try {
         const messageBody = JSON.parse(record.body);
