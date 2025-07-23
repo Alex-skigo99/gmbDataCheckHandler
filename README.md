@@ -1,1 +1,3 @@
 # gmbDataCheckHandler
+
+lambda gmbDataCheckHandler
