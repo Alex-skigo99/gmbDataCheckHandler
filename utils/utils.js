@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { getGoogleAutocompleteAddressResponse } from "./googleMapsUtils.js";
+import { validateAddressWithValidationAPI } from "./googleMapsUtils.js";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -163,42 +163,43 @@ Respond with only "true" if there are potential policy violations, or "false" if
 
 export async function checkFakeAddress(addressLines, locality, administrativeArea, postalCode, regionCode) {
     try {
-        const fullAddress = [
-            Array.isArray(addressLines) ? addressLines.join(' ') : addressLines,
-            locality,
-            administrativeArea,
-            postalCode,
-            regionCode
-        ].filter(Boolean).join(',');
+        const addressComponents = {};
         
-        if (!fullAddress.trim()) {
+        if (addressLines) {
+            addressComponents.addressLines = Array.isArray(addressLines) ? addressLines : [addressLines];
+        }
+        if (locality) {
+            addressComponents.locality = locality;
+        }
+        if (administrativeArea) {
+            addressComponents.administrativeArea = administrativeArea;
+        }
+        if (postalCode) {
+            addressComponents.postalCode = postalCode;
+        }
+        if (regionCode) {
+            addressComponents.regionCode = regionCode;
+        }
+        
+        // Check if we have enough address components
+        if (!addressComponents.addressLines && !locality && !administrativeArea) {
+            console.log('Insufficient address components provided');
             return null;
         }
         
-        const response = await getGoogleAutocompleteAddressResponse(fullAddress);
+        const response = await validateAddressWithValidationAPI(addressComponents);
         
-        if (!response || !response.data) {
-            console.error('Google Autocomplete API request failed');
+        if (!response || !response.isValid === undefined) {
+            console.error('Address Validation API request failed');
             return null; // Assume real if API fails
         }
         
-        const results = response.data.predictions || [];
+        const isFake = response.isFake;
         
-        if (!Array.isArray(results) || results.length === 0) {
-            return true;
-        }
+        console.log(`Address validation result: ${isFake ? 'Fake' : 'Valid or not checked'}, Details:`, response);
         
-        const hasValidMatch = results.some(result => {
-            const resultAddress = result.description.toLowerCase();
-            const inputAddressLower = fullAddress.toLowerCase();
-            
-            const addressParts = inputAddressLower.split(',').map(part => part.trim());
-            return addressParts.some(part => 
-                part.length > 2 && resultAddress.includes(part)
-            );
-        });
+        return isFake;
         
-        return !hasValidMatch;
     } catch (error) {
         console.error('Error checking fake address:', error);
         return null;
