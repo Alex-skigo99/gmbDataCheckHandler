@@ -1,9 +1,9 @@
 import axios from "axios";
-import layerUtils from "/opt/nodejs/utils/layerUtils.js";
+import Utils from "/opt/nodejs/utils.js";
 
 export async function validateAddressWithValidationAPI(address) {
     try {
-        const apiKey = await layerUtils.getGoogleMapsApiKey();
+        const apiKey = await Utils.getGoogleMapsApiKey();
         
         const response = await axios.post('https://addressvalidation.googleapis.com/v1:validateAddress', {
             address: address
