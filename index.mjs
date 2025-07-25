@@ -11,28 +11,28 @@ import {
 } from "./utils/utils.js";
 
 export const handler = async (event) => {
-  try {
-    console.log('Processing SQS event:', JSON.stringify(event, null, 2));
+  const gmbData = event.Records.map((r) => JSON.parse(r.body));
+  console.log("GMB data:", JSON.stringify(gmbData, null, 2));
     
-    const results = [];
-    
-    for (const record of event.Records) {
-      try {
-        const messageBody = JSON.parse(record.body);
-        console.log('Processing message:', messageBody);
-        
-        const result = await processGmbData(messageBody);
-        results.push(result);
-        
-      } catch (error) {
-        console.error('Error processing record:', error);
-        results.push({
-          success: false,
-          error: error.message,
-          record: record.body
-        });
-      }
-    }
+  try {  
+    const results = await Promise.all(
+      gmbData.map(async (record) => {
+        try {
+          console.log('Processing message:', record);
+          
+          const result = await processGmbData(record);
+          return result;
+          
+        } catch (error) {
+          console.error('Error processing record:', error);
+          return {
+            success: false,
+            error: error.message,
+            record: record.body
+          };
+        }
+      })
+    );
     
     return {
       statusCode: 200,
