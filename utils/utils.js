@@ -182,9 +182,9 @@ export async function checkFakeAddress(addressLines, locality, administrativeAre
         }
         
         // Check if we have enough address components
-        if (!addressComponents.addressLines && !locality && !administrativeArea) {
+        if (!addressComponents.addressLines && !addressComponents.regionCode && (addressComponents.administrativeArea || addressComponents.locality)) {
             console.log('Insufficient address components provided');
-            return null;
+            return false;
         }
         
         const response = await validateAddressWithValidationAPI(addressComponents);

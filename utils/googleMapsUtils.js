@@ -31,10 +31,10 @@ export async function validateAddressWithValidationAPI(address) {
                 
         return {
             isFake: hasUnconfirmedComponents,
-            isComplete: missingComponents.length === 0,
-            correctedAddress: address_data.formattedAddress || 'N/A',
-            confidence: addressComplete,
-            reason: verdict.reason || 'Validation completed'
+            // isComplete: missingComponents.length === 0,
+            // correctedAddress: address_data.formattedAddress || 'N/A',
+            // confidence: addressComplete,
+            // reason: verdict.reason || 'Validation completed'
         };
         
     } catch (error) {
