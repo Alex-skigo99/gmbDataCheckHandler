@@ -134,13 +134,22 @@ export function checkSuspiciousReviews(reviewsDates) {
 }
 
 export async function checkPolicyViolations(description, postsText, answersText) {
-    if (!description || description.trim() === '') {
-        return false;
+    if ((!description || description.trim() === "") &&
+        (!postsText || postsText.length === 0) &&
+        (!answersText || answersText.length === 0)) {
+        return { isPolicyViolations: null, note: "No description, posts, or answers in GMB data" };
     }
     try {
-        const contentToCheck = `Description: ${description}
-Posts: ${postsText.join('\n')}
-Answers: ${answersText.join('\n')}`.trim();
+        let contentToCheck = ""; 
+        if (description) {
+            contentToCheck += `Description: ${description}\n`;
+        }
+        if (postsText && postsText.length > 0) {
+            contentToCheck += `Posts: ${postsText.join("\n")}\n`;
+        }
+        if (answersText && answersText.length > 0) {
+            contentToCheck += `Answers: ${answersText.join("\n")}\n`;
+        }
 
         const prompt = `You're an SEO expert. Analyze the following business information for Google My Business policy violations. Look for content that includes prohibited items such as:
 - Regulated products (alcohol, firearms, drugs, tobacco)

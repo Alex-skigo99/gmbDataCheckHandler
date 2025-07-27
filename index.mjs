@@ -106,8 +106,8 @@ async function processGmbData(data) {
       is_missing_hours_web_description: isMissingHoursWebDescription,
       is_suspicious_reviews: isSuspiciousReviews,
       is_policy_violations: PolicyViolationsResult.isPolicyViolations,
-      policy_violations_note: PolicyViolationsResult.note,
-      policy_violations_checked_at: new Date().toISOString(),
+      // policy_violations_note: PolicyViolationsResult.note,
+      // policy_violations_checked_at: new Date().toISOString(),
       is_fake_address: isFakeAddress,
     };
     
