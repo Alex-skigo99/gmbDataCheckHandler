@@ -133,31 +133,47 @@ export function checkSuspiciousReviews(reviewsDates) {
     }
 }
 
-export async function checkPolicyViolations(description) {
+export async function checkPolicyViolations(description, postsText, answersText) {
     if (!description || description.trim() === '') {
         return false;
     }
-    try {      
-        const contentToCheck = `Description: ${description}`.trim();
-        
-        const prompt = `Analyze the following business information for Google My Business policy violations. Look for content that includes prohibited items such as:
+    try {
+        const contentToCheck = `Description: ${description}
+Posts: ${postsText.join('\n')}
+Answers: ${answersText.join('\n')}`.trim();
+
+        const prompt = `You're an SEO expert. Analyze the following business information for Google My Business policy violations. Look for content that includes prohibited items such as:
 - Regulated products (alcohol, firearms, drugs, tobacco)
 - Adult content
 - Illegal services
 - Misleading or deceptive content
 - Spam or irrelevant content
+If yes, explain why. If not, explain why not.
 
 Business Information:
 ${contentToCheck}
 
-Respond with only "true" if there are potential policy violations, or "false" if the content appears compliant.`;
+Respond with only "true" if there are potential policy violations, or "false" if the content appears compliant.
+Respond in JSON format like: { \"isPolicyViolations\": true/false, \"note\": \"Your explanation here.\" }`;
 
         const response = await generateResponse(prompt);
-        const result = response.choices[0].message.content.trim().toLowerCase();
-        return result.includes('true');
+        const result = response.choices[0].message.content.trim();
+        content = content.replace(/```json\s*([\s\S]*?)\s*```/, '$1').trim();
+        try {
+            const parsedResult = JSON.parse(result);
+            return {
+                isPolicyViolations: parsedResult.isPolicyViolations === true,
+                note: parsedResult.note
+            }
+
+        } catch (error) {
+            console.error('Error parsing policy violations response:', error);
+            return { isPolicyViolations: null, note: "" };
+        }
+
     } catch (error) {
         console.error('Error checking policy violations:', error);
-        return false;
+        return { isPolicyViolations: null, note: "" };
     }
 }
 
@@ -181,15 +197,20 @@ export async function checkFakeAddress(addressLines, locality, administrativeAre
             addressComponents.regionCode = regionCode;
         }
         
-        // Check if we have enough address components
-        if (!addressComponents.addressLines && !addressComponents.regionCode && (addressComponents.administrativeArea || addressComponents.locality)) {
+        const hasAddressDetail =
+            addressComponents.addressLines ||
+            addressComponents.locality ||
+            addressComponents.administrativeArea ||
+            addressComponents.postalCode;
+
+        if (!addressComponents.regionCode || !hasAddressDetail) {
             console.log('Insufficient address components provided');
             return false;
         }
         
         const response = await validateAddressWithValidationAPI(addressComponents);
         
-        if (!response || !response.isValid === undefined) {
+        if (!response || typeof response.isFake === 'undefined') {
             console.error('Address Validation API request failed');
             return null; // Assume real if API fails
         }

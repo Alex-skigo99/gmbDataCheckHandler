@@ -69,7 +69,9 @@ async function processGmbData(data) {
     sublocality,
     postal_code,
     description,
-    reviews_dates
+    reviews_dates,
+    posts_text,
+    answers_text
   } = data;
   
   console.log(`Processing GMB ID: ${gmb_id}`);
@@ -81,7 +83,7 @@ async function processGmbData(data) {
       isMoreThan5ServiceAreas,
       isMissingHoursWebDescription,
       isSuspiciousReviews,
-      isPolicyViolations,
+      PolicyViolationsResult,
       isFakeAddress
     ] = await Promise.all([
       checkMoreThan3Categories(additional_categories),
@@ -89,7 +91,7 @@ async function processGmbData(data) {
       checkMoreThan5ServiceAreas(service_areas),
       checkMissingHoursWebDescription(regular_hours, website_uri, description),
       checkSuspiciousReviews(reviews_dates),
-      checkPolicyViolations(description),
+      checkPolicyViolations(description, posts_text, answers_text),
       checkFakeAddress(address_lines, locality, administrative_area, postal_code, region_code)
     ]);
     
@@ -99,7 +101,9 @@ async function processGmbData(data) {
       is_more_than_5_service_areas: isMoreThan5ServiceAreas,
       is_missing_hours_web_description: isMissingHoursWebDescription,
       is_suspicious_reviews: isSuspiciousReviews,
-      is_policy_violations: isPolicyViolations,
+      is_policy_violations: PolicyViolationsResult.isPolicyViolations,
+      policy_violations_note: PolicyViolationsResult.note,
+      policy_violations_checked_at: new Date().toISOString(),
       is_fake_address: isFakeAddress,
     };
     
