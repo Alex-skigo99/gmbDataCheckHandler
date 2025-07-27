@@ -28,7 +28,7 @@ export const handler = async (event) => {
           return {
             success: false,
             error: error.message,
-            record: record.body
+            record: record
           };
         }
       })
@@ -55,6 +55,10 @@ export const handler = async (event) => {
 };
 
 async function processGmbData(data) {
+  if (!data || !data.gmb_id) {
+    throw new Error('Invalid GMB data: missing gmb_id');
+  }
+
   const {
     gmb_id,
     primary_category,
