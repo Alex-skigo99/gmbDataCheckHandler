@@ -15,6 +15,8 @@ export async function generateResponse(prompt) {
 }
 
 export function checkMoreThan3Categories(additionalCategories) {
+    if (additionalCategories === undefined) return undefined;
+
     try {
         const additionalCategoriesArray = Array.isArray(additionalCategories) 
             ? additionalCategories 
@@ -29,6 +31,8 @@ export function checkMoreThan3Categories(additionalCategories) {
 }
 
 export async function checkNotRelevantCategories(primaryCategory, additionalCategories) {
+    if (primaryCategory === undefined || additionalCategories === undefined) return undefined;
+
     try {
         const additionalCategoriesArray = Array.isArray(additionalCategories) 
             ? additionalCategories 
@@ -57,6 +61,7 @@ Respond with only "true" if the categories are NOT RELEVANT to each other, or "f
 }
 
 export function checkMoreThan5ServiceAreas(serviceAreas) {
+    if (serviceAreas === undefined) return undefined;
     try {
         const serviceAreasArray = Array.isArray(serviceAreas) 
             ? serviceAreas 
@@ -70,6 +75,7 @@ export function checkMoreThan5ServiceAreas(serviceAreas) {
 }
 
 export function checkMissingHoursWebDescription(regularHours, websiteUri, description) {
+    if (regularHours === undefined || websiteUri === undefined || description === undefined) return undefined;
     try {
         const hoursData = typeof regularHours === 'string' 
             ? JSON.parse(regularHours || '{}') 
@@ -87,6 +93,8 @@ export function checkMissingHoursWebDescription(regularHours, websiteUri, descri
 }
 
 export function checkSuspiciousReviews(reviewsDates) {
+    if (reviewsDates === undefined) return undefined;
+
     try {
         const datesArray = Array.isArray(reviewsDates) 
             ? reviewsDates 
@@ -134,20 +142,23 @@ export function checkSuspiciousReviews(reviewsDates) {
 }
 
 export async function checkPolicyViolations(description, postsText, answersText) {
+    if (description === undefined && postsText === undefined && answersText === undefined) {
+        return undefined; // Return undefined if no content to check
+    }
     if ((!description || description.trim() === "") &&
-        (!postsText || postsText.length === 0) &&
-        (!answersText || answersText.length === 0)) {
-        return { isPolicyViolations: null, note: "No description, posts, or answers in GMB data" };
+        (!postsText || (Array.isArray(postsText) && postsText.length === 0)) &&
+        (!answersText || (Array.isArray(answersText) && answersText.length === 0))) {
+        return { isPolicyViolations: null, note: "No description, posts, or answers provided" };
     }
     try {
         let contentToCheck = ""; 
         if (description) {
             contentToCheck += `Description: ${description}\n`;
         }
-        if (postsText && postsText.length > 0) {
+        if (postsText && Array.isArray(postsText) && postsText.length > 0) {
             contentToCheck += `Posts: ${postsText.join("\n")}\n`;
         }
-        if (answersText && answersText.length > 0) {
+        if (answersText && Array.isArray(answersText) && answersText.length > 0) {
             contentToCheck += `Answers: ${answersText.join("\n")}\n`;
         }
 
@@ -167,9 +178,9 @@ Respond in JSON format like: { \"isPolicyViolations\": true/false, \"note\": \"Y
 
         const response = await generateResponse(prompt);
         const result = response.choices[0].message.content.trim();
-        content = content.replace(/```json\s*([\s\S]*?)\s*```/, '$1').trim();
+        const cleanedResult = result.replace(/```json\s*([\s\S]*?)\s*```/, '$1').trim();
         try {
-            const parsedResult = JSON.parse(result);
+            const parsedResult = JSON.parse(cleanedResult);
             return {
                 isPolicyViolations: parsedResult.isPolicyViolations === true,
                 note: parsedResult.note
@@ -187,6 +198,9 @@ Respond in JSON format like: { \"isPolicyViolations\": true/false, \"note\": \"Y
 }
 
 export async function checkFakeAddress(addressLines, locality, administrativeArea, postalCode, regionCode) {
+    if (addressLines === undefined || locality === undefined || administrativeArea === undefined || postalCode === undefined || regionCode === undefined) {
+        return undefined; // Return undefined if any required field is missing
+    }
     try {
         const addressComponents = {};
         

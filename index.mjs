@@ -99,17 +99,18 @@ async function processGmbData(data) {
       checkFakeAddress(address_lines, locality, administrative_area, postal_code, region_code)
     ]);
     
-    const updateData = {
-      is_more_than_3_categories: isMoreThan3Categories,
-      is_not_relevant_categories: isNotRelevantCategories,
-      is_more_than_5_service_areas: isMoreThan5ServiceAreas,
-      is_missing_hours_web_description: isMissingHoursWebDescription,
-      is_suspicious_reviews: isSuspiciousReviews,
-      is_policy_violations: PolicyViolationsResult.isPolicyViolations,
-      // policy_violations_note: PolicyViolationsResult.note,
-      // policy_violations_checked_at: new Date().toISOString(),
-      is_fake_address: isFakeAddress,
-    };
+    const updateData = {};
+    if (isMoreThan3Categories !== undefined) updateData.is_more_than_3_categories = isMoreThan3Categories;
+    if (isNotRelevantCategories !== undefined) updateData.is_not_relevant_categories = isNotRelevantCategories;
+    if (isMoreThan5ServiceAreas !== undefined) updateData.is_more_than_5_service_areas = isMoreThan5ServiceAreas;
+    if (isMissingHoursWebDescription !== undefined) updateData.is_missing_hours_web_description = isMissingHoursWebDescription;
+    if (isSuspiciousReviews !== undefined) updateData.is_suspicious_reviews = isSuspiciousReviews;
+    if (PolicyViolationsResult !== undefined) {
+      updateData.is_policy_violations = PolicyViolationsResult.isPolicyViolations;
+      updateData.policy_violations_note = PolicyViolationsResult.note;
+      updateData.policy_violations_checked_at = new Date().toISOString();
+    }
+    if (isFakeAddress !== undefined) updateData.is_fake_address = isFakeAddress;
     
     console.log(`Updating GMB ID ${gmb_id} with data:`, updateData);
     
